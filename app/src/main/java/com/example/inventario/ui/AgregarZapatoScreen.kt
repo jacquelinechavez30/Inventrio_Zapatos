@@ -26,7 +26,7 @@ import java.util.UUID
 fun AgregarZapatoScreen(navController: NavController, viewModel: ZapatosViewModel) {
     var estilo by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
-    var cantidad by remember { mutableStateOf("") }
+    var tallasCantidades by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var imagenUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -73,11 +73,10 @@ fun AgregarZapatoScreen(navController: NavController, viewModel: ZapatosViewMode
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
-                value = cantidad,
-                onValueChange = { cantidad = it },
-                label = { Text("Cantidad") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                value = tallasCantidades,
+                onValueChange = { tallasCantidades = it },
+                label = { Text("Tallas y Cantidades") },
+                modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
@@ -116,14 +115,13 @@ fun AgregarZapatoScreen(navController: NavController, viewModel: ZapatosViewMode
                         }
 
                         val precioDouble = precio.toDoubleOrNull() ?: 0.0
-                        val cantidadInt = cantidad.toIntOrNull() ?: 0
 
                         val nuevoZapato = Zapato(
                             estilo = estilo,
                             precio = precioDouble,
-                            cantidad = cantidadInt,
                             descripcion = descripcion,
-                            imagen = imageUrl
+                            imagen = imageUrl,
+                            tallasCantidades = tallasCantidades
                         )
                         viewModel.agregarZapato(nuevoZapato)
                         navController.popBackStack()

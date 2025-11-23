@@ -53,16 +53,6 @@ class ZapatosViewModel : ViewModel() {
         }
     }
 
-    fun venderZapato(zapato: Zapato) {
-        viewModelScope.launch {
-            val nuevaCantidad = zapato.cantidad - 1
-            if (nuevaCantidad >= 0) {
-                zapatosRepository.actualizarCantidad(zapato.id!!, nuevaCantidad)
-                obtenerZapatos() // Refresh the list
-            }
-        }
-    }
-
     fun eliminarZapato(zapato: Zapato) {
         viewModelScope.launch {
             if (zapato.id != null) {

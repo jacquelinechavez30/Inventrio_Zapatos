@@ -31,14 +31,6 @@ class ZapatosRepository(private val postgrest: Postgrest, private val storage: S
         }
     }
 
-    suspend fun actualizarCantidad(zapatoId: Int, nuevaCantidad: Int) {
-        postgrest.from("zapatos").update(mapOf("cantidad" to nuevaCantidad)) {
-            filter {
-                eq("id", zapatoId)
-            }
-        }
-    }
-
     suspend fun eliminarZapato(zapatoId: Int) {
         postgrest.from("zapatos").delete {
             filter {

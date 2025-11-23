@@ -3,6 +3,7 @@ package com.example.inventario.ui
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -18,6 +19,7 @@ import coil.compose.AsyncImage
 import com.example.inventario.R
 import com.example.inventario.model.Zapato
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +29,7 @@ fun EditarZapatoScreen(navController: NavController, viewModel: ZapatosViewModel
 
     var estilo by remember(zapato) { mutableStateOf(zapato?.estilo ?: "") }
     var precio by remember(zapato) { mutableStateOf(zapato?.precio?.toString() ?: "") }
-    var cantidad by remember(zapato) { mutableStateOf(zapato?.cantidad?.toString() ?: "") }
+    var tallasCantidades by remember(zapato) { mutableStateOf(zapato?.tallasCantidades ?: "") }
     var descripcion by remember(zapato) { mutableStateOf(zapato?.descripcion ?: "") }
     var imagenUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -78,11 +80,10 @@ fun EditarZapatoScreen(navController: NavController, viewModel: ZapatosViewModel
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
-                value = cantidad,
-                onValueChange = { cantidad = it },
-                label = { Text("Cantidad") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                value = tallasCantidades,
+                onValueChange = { tallasCantidades = it },
+                label = { Text("Tallas y Cantidades") },
+                modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
@@ -101,7 +102,13 @@ fun EditarZapatoScreen(navController: NavController, viewModel: ZapatosViewModel
                 AsyncImage(
                     model = imagenUri ?: zapato?.imagen,
                     contentDescription = "Imagen del zapato",
-                    modifier = Modifier.size(100.dp)
+                    modifier = Modifier.size(100.dp).clickable {
+                        val imageUrl = imagenUri?.toString() ?: zapato?.imagen
+                        imageUrl?.let {
+                            val encodedUrl = URLEncoder.encode(it, "UTF-8")
+                            navController.navigate("ver_imagen/$encodedUrl")
+                        }
+                    }
                 )
             }
             
@@ -119,12 +126,11 @@ fun EditarZapatoScreen(navController: NavController, viewModel: ZapatosViewModel
                         }
 
                         val precioDouble = precio.toDoubleOrNull() ?: zapato?.precio ?: 0.0
-                        val cantidadInt = cantidad.toIntOrNull() ?: zapato?.cantidad ?: 0
 
                         val zapatoActualizado = zapato?.copy(
                             estilo = estilo,
                             precio = precioDouble,
-                            cantidad = cantidadInt,
+                            tallasCantidades = tallasCantidades,
                             descripcion = descripcion,
                             imagen = imageUrl
                         )

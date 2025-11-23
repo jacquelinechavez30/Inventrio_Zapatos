@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,8 +31,11 @@ import coil.compose.AsyncImage
 import com.example.inventario.model.Zapato
 import com.example.inventario.ui.AgregarZapatoScreen
 import com.example.inventario.ui.EditarZapatoScreen
+import com.example.inventario.ui.VerImagenScreen
 import com.example.inventario.ui.ZapatosViewModel
 import com.example.inventario.ui.theme.InventarioTheme
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +78,13 @@ fun InventarioApp() {
                 )
             }
         }
+        composable(
+            "ver_imagen/{imageUrl}",
+            arguments = listOf(navArgument("imageUrl") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val imageUrl = backStackEntry.arguments?.getString("imageUrl")
+            VerImagenScreen(navController = navController, imageUrl = URLDecoder.decode(imageUrl, "UTF-8"))
+        }
     }
 }
 
@@ -88,7 +99,7 @@ fun InventarioScreen(navController: NavController, viewModel: ZapatosViewModel) 
             TopAppBar(
                 title = { Text("Inventario de Zapatos") },
                 actions = {
-                    IconButton(onClick = { viewModel.obtenerZapatos() }) { 
+                    IconButton(onClick = { viewModel.obtenerZapatos() }) {
                         Icon(painter = painterResource(id = R.drawable.ic_refresh), contentDescription = "Refrescar")
                     }
                     IconButton(onClick = { showMenu = !showMenu }) {
@@ -122,18 +133,39 @@ fun InventarioScreen(navController: NavController, viewModel: ZapatosViewModel) 
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.Top
                     ) {
                         AsyncImage(
                             model = zapato.imagen,
                             contentDescription = zapato.estilo,
-                            modifier = Modifier.size(100.dp)
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clickable {
+                                    val encodedUrl = URLEncoder.encode(zapato.imagen, "UTF-8")
+                                    navController.navigate("ver_imagen/$encodedUrl")
+                                }
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = zapato.estilo, style = MaterialTheme.typography.titleLarge)
+                            Text(
+                                text = zapato.estilo, 
+                                style = MaterialTheme.typography.titleLarge,
+                                maxLines = 3
+                            )
                             Text(text = "Precio: $${zapato.precio}", style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "Cantidad: ${zapato.cantidad}", style = MaterialTheme.typography.bodyMedium)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Column {
+                                Text(
+                                    text = "Tallas y Cantidades",
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                                Text(
+                                    text = zapato.tallasCantidades,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 5
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(text = zapato.descripcion, style = MaterialTheme.typography.bodySmall)
                         }
                         Column {
@@ -143,9 +175,6 @@ fun InventarioScreen(navController: NavController, viewModel: ZapatosViewModel) 
                             IconButton(onClick = { viewModel.eliminarZapato(zapato) }) {
                                 Icon(Icons.Default.Delete, contentDescription = "Eliminar")
                             }
-                        }
-                        Button(onClick = { viewModel.venderZapato(zapato) }) {
-                            Text("-1")
                         }
                     }
                 }
